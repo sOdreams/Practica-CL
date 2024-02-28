@@ -210,15 +210,20 @@ antlrcpp::Any TypeCheckVisitor::visitArithmetic(AslParser::ArithmeticContext *ct
   if (((not Types.isErrorTy(t1)) and (not Types.isNumericTy(t1))) or
       ((not Types.isErrorTy(t2)) and (not Types.isNumericTy(t2))))
     Errors.incompatibleOperator(ctx->op);
-  if(Types.isFloatTY(t1) or Types.isFloatTY(t2)){
+  if(Types.isFloatTy(t1) or Types.isFloatTy(t2)){
     TypesMgr::TypeId t = Types.createFloatTy();
+    putTypeDecor(ctx, t);
   }
   else{
     TypesMgr::TypeId t = Types.createIntegerTy();
+    putTypeDecor(ctx, t);
   }
-  putTypeDecor(ctx, t);
   putIsLValueDecor(ctx, false);
   DEBUG_EXIT();
+  return 0;
+}
+
+antlrcpp::Any TypeCheckVisitor::visitLogical(AslParser::LogicalContext *ctx){
   return 0;
 }
 

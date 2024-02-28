@@ -128,8 +128,8 @@ antlrcpp::Any SymbolsVisitor::visitType(AslParser::TypeContext *ctx) {
     TypesMgr::TypeId t = Types.createFloatTy();
     putTypeDecor(ctx, t);
   }
-  else if (ctx->BOOl()) {
-    TypesMgr::TypeId t = Types.createBooleany();
+  else if (ctx->BOOL()) {
+    TypesMgr::TypeId t = Types.createBooleanTy();
     putTypeDecor(ctx, t);
   }
   else if (ctx->CHAR()) {

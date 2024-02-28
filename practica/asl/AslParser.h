@@ -16,7 +16,7 @@ public:
     MUL = 8, VAR = 9, INT = 10, BOOL = 11, FLOAT = 12, CHAR = 13, IF = 14, 
     THEN = 15, ELSE = 16, ENDIF = 17, FUNC = 18, ENDFUNC = 19, READ = 20, 
     WRITE = 21, ID = 22, INTVAL = 23, STRING = 24, COMMENT = 25, WS = 26, 
-    DIV = 27, MINUS = 28, EQ = 29, NEG = 30, GT = 31, GE = 32, LT = 33, 
+    FLOATVAL = 27, DIV = 28, MINUS = 29, NEQ = 30, GT = 31, GE = 32, LT = 33, 
     LE = 34, AND = 35, OR = 36
   };
 
@@ -259,8 +259,7 @@ public:
     std::vector<ExprContext *> expr();
     ExprContext* expr(size_t i);
     antlr4::tree::TerminalNode *EQUAL();
-    antlr4::tree::TerminalNode *EQ();
-    antlr4::tree::TerminalNode *NEG();
+    antlr4::tree::TerminalNode *NEQ();
     antlr4::tree::TerminalNode *GT();
     antlr4::tree::TerminalNode *GE();
     antlr4::tree::TerminalNode *LT();
@@ -273,6 +272,7 @@ public:
     ValueContext(ExprContext *ctx);
 
     antlr4::tree::TerminalNode *INTVAL();
+    antlr4::tree::TerminalNode *FLOATVAL();
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
