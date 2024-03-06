@@ -1,3 +1,9 @@
+//COMO COMPILAR(en la carpeta "asl"):
+//1. >> make antlr
+//2. >> make
+//3. ./asl ../examples/jpbasic_chkt_01.asl
+
+
 //////////////////////////////////////////////////////////////////////
 //
 //    Asl - Another simple language (grammar)
@@ -81,13 +87,19 @@ left_expr
         ;
 
 // Grammar for expressions with boolean, relational and aritmetic operators
-expr    : expr op=(MUL|DIV) expr                            # arithmetic
+
+expr    : MINUS expr                                        # negation
+        | LPAR expr RPAR                                    # parenthesis
+        | expr op=(MUL|DIV) expr                            # arithmetic
         | expr op=(PLUS|MINUS) expr                         # arithmetic
-        | expr op=(EQUAL|NEQ|GT|GE|LT|LE) expr           # relational
+        | expr op=(EQUAL|NEQ|GT|GE|LT|LE) expr              # relational
         | expr op=AND expr                                  # logical
         | expr op=OR expr                                   # logical
+        | op=NOT expr                                       # logical
         | INTVAL                                            # value
         | FLOATVAL                                          # value
+        | BOOLVAL                                           # value
+        | CHARVAL                                           # value
         | ident                                             # exprIdent
         ;
 
@@ -101,6 +113,18 @@ ident   : ID
 
 ASSIGN    : '=' ;
 EQUAL     : '==' ;
+NEQ       : '!=' ;
+GT        : '>' ;
+GE        : '>=' ;
+LE        : '<=' ;
+LT        : '<' ;
+NOT       : 'not' ;
+AND       : 'and' ;
+OR        : 'or' ;
+MINUS     : '-' ;
+DIV       : '/' ;
+LPAR      : '(';
+RPAR      : ')';
 PLUS      : '+' ;
 MUL       : '*';
 VAR       : 'var';
@@ -117,7 +141,11 @@ ENDFUNC   : 'endfunc' ;
 READ      : 'read' ;
 WRITE     : 'write' ;
 ID        : ('a'..'z'|'A'..'Z') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')* ; //identificadors, sempre declarats despres de les paraules clau
+
 INTVAL    : ('0'..'9')+ ;
+BOOLVAL   : ('true'|'false');
+FLOATVAL  : ('0'..'9')+ ('.') ('0'..'9')+;
+CHARVAL   : '\'' ( ESC_SEQ | ~('\\'|'"') ) '\'';
 
 // Strings (in quotes) with escape sequences
 STRING    : '"' ( ESC_SEQ | ~('\\'|'"') )* '"' ;

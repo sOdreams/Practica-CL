@@ -207,9 +207,11 @@ antlrcpp::Any TypeCheckVisitor::visitArithmetic(AslParser::ArithmeticContext *ct
   TypesMgr::TypeId t1 = getTypeDecor(ctx->expr(0));
   visit(ctx->expr(1));
   TypesMgr::TypeId t2 = getTypeDecor(ctx->expr(1));
+
   if (((not Types.isErrorTy(t1)) and (not Types.isNumericTy(t1))) or
       ((not Types.isErrorTy(t2)) and (not Types.isNumericTy(t2))))
     Errors.incompatibleOperator(ctx->op);
+
   if(Types.isFloatTy(t1) or Types.isFloatTy(t2)){
     TypesMgr::TypeId t = Types.createFloatTy();
     putTypeDecor(ctx, t);
@@ -233,10 +235,12 @@ antlrcpp::Any TypeCheckVisitor::visitRelational(AslParser::RelationalContext *ct
   TypesMgr::TypeId t1 = getTypeDecor(ctx->expr(0));
   visit(ctx->expr(1));
   TypesMgr::TypeId t2 = getTypeDecor(ctx->expr(1));
+
   std::string oper = ctx->op->getText();
   if ((not Types.isErrorTy(t1)) and (not Types.isErrorTy(t2)) and
       (not Types.comparableTypes(t1, t2, oper)))
     Errors.incompatibleOperator(ctx->op);
+
   TypesMgr::TypeId t = Types.createBooleanTy();
   putTypeDecor(ctx, t);
   putIsLValueDecor(ctx, false);
@@ -285,6 +289,15 @@ antlrcpp::Any TypeCheckVisitor::visitIdent(AslParser::IdentContext *ctx) {
   return 0;
 }
 
+antlrcpp::Any TypeCheckVisitor::visitNegation(AslParser::NegationContext *ctx){
+  return 0;
+}
+
+antlrcpp::Any TypeCheckVisitor::visitParenthesis(AslParser::ParenthesisContext *ctx){
+  return 0;
+}
+
+
 
 // Getters for the necessary tree node atributes:
 //   Scope, Type ans IsLValue
@@ -309,3 +322,5 @@ void TypeCheckVisitor::putTypeDecor(antlr4::ParserRuleContext *ctx, TypesMgr::Ty
 void TypeCheckVisitor::putIsLValueDecor(antlr4::ParserRuleContext *ctx, bool b) {
   Decorations.putIsLValue(ctx, b);
 }
+
+
