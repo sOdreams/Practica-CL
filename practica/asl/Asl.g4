@@ -1,7 +1,7 @@
 //COMO COMPILAR(en la carpeta "asl"):
 //1. >> make antlr
 //2. >> make
-//3. ./asl ../examples/jpbasic_chkt_01.asl
+//3. ./asl ../examples/jp_chkt_01.asl
 
 
 //////////////////////////////////////////////////////////////////////

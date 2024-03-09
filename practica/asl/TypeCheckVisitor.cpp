@@ -333,8 +333,12 @@ antlrcpp::Any TypeCheckVisitor::visitUnary(AslParser::UnaryContext *ctx){ //2 ca
   return 0;
 }
 
-antlrcpp::Any TypeCheckVisitor::visitParenthesis(AslParser::ParenthesisContext *ctx){ //| LPAR expr RPAR, visitar expr
+antlrcpp::Any TypeCheckVisitor::visitParenthesis(AslParser::ParenthesisContext *ctx){ //decorar el nodo con el tipo de ("expr") directamenre
   visit(ctx->expr());
+  TypesMgr::TypeId t1 = getTypeDecor(ctx->expr());
+  putTypeDecor(ctx, t1);
+  putIsLValueDecor(ctx, false);
+  DEBUG_EXIT();
   return 0;
 }
 
