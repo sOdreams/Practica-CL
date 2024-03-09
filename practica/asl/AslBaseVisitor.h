@@ -67,10 +67,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitNegation(AslParser::NegationContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual antlrcpp::Any visitExprIdent(AslParser::ExprIdentContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -80,6 +76,10 @@ public:
   }
 
   virtual antlrcpp::Any visitRelational(AslParser::RelationalContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitUnary(AslParser::UnaryContext *ctx) override {
     return visitChildren(ctx);
   }
 

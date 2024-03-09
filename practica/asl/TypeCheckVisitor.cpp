@@ -127,6 +127,7 @@ antlrcpp::Any TypeCheckVisitor::visitAssignStmt(AslParser::AssignStmtContext *ct
   visit(ctx->expr());
   TypesMgr::TypeId t1 = getTypeDecor(ctx->left_expr());
   TypesMgr::TypeId t2 = getTypeDecor(ctx->expr());
+
   if ((not Types.isErrorTy(t1)) and (not Types.isErrorTy(t2)) and
       (not Types.copyableTypes(t1, t2)))
     Errors.incompatibleAssignment(ctx->ASSIGN());
@@ -212,7 +213,7 @@ antlrcpp::Any TypeCheckVisitor::visitArithmetic(AslParser::ArithmeticContext *ct
       ((not Types.isErrorTy(t2)) and (not Types.isNumericTy(t2))))
     Errors.incompatibleOperator(ctx->op);
 
-  if(Types.isFloatTy(t1) or Types.isFloatTy(t2)){
+  if(Types.isFloatTy(t1) or Types.isFloatTy(t2)){  //CONVERSION A FLOAT
     TypesMgr::TypeId t = Types.createFloatTy();
     putTypeDecor(ctx, t);
   }
@@ -225,11 +226,7 @@ antlrcpp::Any TypeCheckVisitor::visitArithmetic(AslParser::ArithmeticContext *ct
   return 0;
 }
 
-antlrcpp::Any TypeCheckVisitor::visitLogical(AslParser::LogicalContext *ctx){
-  return 0;
-}
-
-antlrcpp::Any TypeCheckVisitor::visitRelational(AslParser::RelationalContext *ctx) {
+antlrcpp::Any TypeCheckVisitor::visitRelational(AslParser::RelationalContext *ctx) {//EQ,NEQ.. COmprobar que son comparableTypes()
   DEBUG_ENTER();
   visit(ctx->expr(0));
   TypesMgr::TypeId t1 = getTypeDecor(ctx->expr(0));
@@ -250,8 +247,22 @@ antlrcpp::Any TypeCheckVisitor::visitRelational(AslParser::RelationalContext *ct
 
 antlrcpp::Any TypeCheckVisitor::visitValue(AslParser::ValueContext *ctx) {
   DEBUG_ENTER();
-  TypesMgr::TypeId t = Types.createIntegerTy();
-  putTypeDecor(ctx, t);
+  if (ctx->INTVAL()) {
+    TypesMgr::TypeId t = Types.createIntegerTy();
+    putTypeDecor(ctx, t);
+  }
+  else if(ctx ->FLOATVAL()){
+    TypesMgr::TypeId t = Types.createFloatTy();
+    putTypeDecor(ctx, t);
+  }
+  else if (ctx->BOOLVAL()) {
+    TypesMgr::TypeId t = Types.createBooleanTy();
+    putTypeDecor(ctx, t);
+  }
+  else if (ctx->CHARVAL()) {
+    TypesMgr::TypeId t = Types.createCharacterTy();
+    putTypeDecor(ctx, t);
+  }
   putIsLValueDecor(ctx, false);
   DEBUG_EXIT();
   return 0;
@@ -289,13 +300,73 @@ antlrcpp::Any TypeCheckVisitor::visitIdent(AslParser::IdentContext *ctx) {
   return 0;
 }
 
-antlrcpp::Any TypeCheckVisitor::visitNegation(AslParser::NegationContext *ctx){
+antlrcpp::Any TypeCheckVisitor::visitUnary(AslParser::UnaryContext *ctx){ //2 casos, si es NOT o numero_negativo
+  DEBUG_ENTER();
+  if (ctx->NOT()) {
+    visit(ctx->expr());
+    TypesMgr::TypeId t1 = getTypeDecor(ctx->expr());
+
+    if (((not Types.isErrorTy(t1)) and (not Types.isBooleanTy(t1))))
+      Errors.incompatibleOperator(ctx->op);
+
+    TypesMgr::TypeId t = Types.createBooleanTy();
+    putTypeDecor(ctx, t);
+  }
+  else if(ctx->MINUS()){//otros 2 casos, -int, -float
+    visit(ctx->expr());
+    TypesMgr::TypeId t1 = getTypeDecor(ctx->expr());
+
+    if (((not Types.isErrorTy(t1)) and (not Types.isNumericTy(t1))))
+      Errors.incompatibleOperator(ctx->op);
+
+    if(Types.isFloatTy(t1)){
+      TypesMgr::TypeId t = Types.createFloatTy();
+      putTypeDecor(ctx, t);
+    }
+    else{
+      TypesMgr::TypeId t = Types.createIntegerTy();
+      putTypeDecor(ctx, t);
+    }
+  }
+  putIsLValueDecor(ctx, false);
+  DEBUG_EXIT();
   return 0;
 }
 
-antlrcpp::Any TypeCheckVisitor::visitParenthesis(AslParser::ParenthesisContext *ctx){
+antlrcpp::Any TypeCheckVisitor::visitParenthesis(AslParser::ParenthesisContext *ctx){ //| LPAR expr RPAR, visitar expr
+  visit(ctx->expr());
   return 0;
 }
+
+antlrcpp::Any TypeCheckVisitor::visitLogical(AslParser::LogicalContext *ctx){ //AND y OR, solo pueden ser con BOOLS: isBooleanTy()
+  DEBUG_ENTER();
+  visit(ctx->expr(0));
+  TypesMgr::TypeId t1 = getTypeDecor(ctx->expr(0));
+  visit(ctx->expr(1));
+  TypesMgr::TypeId t2 = getTypeDecor(ctx->expr(1));
+
+  if (((not Types.isErrorTy(t1)) and (not Types.isBooleanTy(t1))) or
+      ((not Types.isErrorTy(t2)) and (not Types.isBooleanTy(t2))))
+    Errors.incompatibleOperator(ctx->op);
+
+  TypesMgr::TypeId t = Types.createBooleanTy();
+  putTypeDecor(ctx, t);
+  putIsLValueDecor(ctx, false);
+  DEBUG_EXIT();
+  return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

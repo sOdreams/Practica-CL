@@ -88,14 +88,13 @@ left_expr
 
 // Grammar for expressions with boolean, relational and aritmetic operators
 
-expr    : MINUS expr                                        # negation
+expr    : op=(NOT|MINUS) expr                               # unary
         | LPAR expr RPAR                                    # parenthesis
         | expr op=(MUL|DIV) expr                            # arithmetic
         | expr op=(PLUS|MINUS) expr                         # arithmetic
         | expr op=(EQUAL|NEQ|GT|GE|LT|LE) expr              # relational
         | expr op=AND expr                                  # logical
         | expr op=OR expr                                   # logical
-        | op=NOT expr                                       # logical
         | INTVAL                                            # value
         | FLOATVAL                                          # value
         | BOOLVAL                                           # value

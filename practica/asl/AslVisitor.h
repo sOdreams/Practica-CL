@@ -45,13 +45,13 @@ public:
 
     virtual antlrcpp::Any visitLeft_expr(AslParser::Left_exprContext *context) = 0;
 
-    virtual antlrcpp::Any visitNegation(AslParser::NegationContext *context) = 0;
-
     virtual antlrcpp::Any visitExprIdent(AslParser::ExprIdentContext *context) = 0;
 
     virtual antlrcpp::Any visitArithmetic(AslParser::ArithmeticContext *context) = 0;
 
     virtual antlrcpp::Any visitRelational(AslParser::RelationalContext *context) = 0;
+
+    virtual antlrcpp::Any visitUnary(AslParser::UnaryContext *context) = 0;
 
     virtual antlrcpp::Any visitParenthesis(AslParser::ParenthesisContext *context) = 0;
 

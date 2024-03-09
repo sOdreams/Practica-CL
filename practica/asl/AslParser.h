@@ -233,15 +233,6 @@ public:
    
   };
 
-  class  NegationContext : public ExprContext {
-  public:
-    NegationContext(ExprContext *ctx);
-
-    antlr4::tree::TerminalNode *MINUS();
-    ExprContext *expr();
-    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-  };
-
   class  ExprIdentContext : public ExprContext {
   public:
     ExprIdentContext(ExprContext *ctx);
@@ -280,6 +271,17 @@ public:
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
+  class  UnaryContext : public ExprContext {
+  public:
+    UnaryContext(ExprContext *ctx);
+
+    antlr4::Token *op = nullptr;
+    ExprContext *expr();
+    antlr4::tree::TerminalNode *NOT();
+    antlr4::tree::TerminalNode *MINUS();
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
   class  ParenthesisContext : public ExprContext {
   public:
     ParenthesisContext(ExprContext *ctx);
@@ -308,7 +310,6 @@ public:
     antlr4::Token *op = nullptr;
     std::vector<ExprContext *> expr();
     ExprContext* expr(size_t i);
-    antlr4::tree::TerminalNode *NOT();
     antlr4::tree::TerminalNode *AND();
     antlr4::tree::TerminalNode *OR();
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
