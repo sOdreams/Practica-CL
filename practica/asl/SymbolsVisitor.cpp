@@ -1,4 +1,4 @@
-//////////////////////////////////////////////////////////////////////
+ //////////////////////////////////////////////////////////////////////
 //
 //    SymbolsVisitor - Walk the parser tree to register symbols
 //                     for the Asl programming language
@@ -106,14 +106,21 @@ antlrcpp::Any SymbolsVisitor::visitDeclarations(AslParser::DeclarationsContext *
 antlrcpp::Any SymbolsVisitor::visitVariable_decl(AslParser::Variable_declContext *ctx) {
   DEBUG_ENTER();
   visit(ctx->type());
-  std::string ident = ctx->ID()->getText();
-  if (Symbols.findInCurrentScope(ident)) {
-    Errors.declaredIdent(ctx->ID());
+
+  //para el ejercicio dos, podemos tener varios declaraciones tipo ID1,ID2,ID3 : type..
+  //para poder tratar todos, hay que recorrer los elementos 'ID' con ID.size() y ID(i)->func (getText)
+
+  for(unsigned long int i = 0; i < ctx->ID().size(); ++i){ 
+    std::string ident = ctx->ID(i)->getText();
+    if (Symbols.findInCurrentScope(ident)) {
+      Errors.declaredIdent(ctx->ID(i));
+    }
+    else {
+      TypesMgr::TypeId t1 = getTypeDecor(ctx->type());
+      Symbols.addLocalVar(ident, t1);
+    }
   }
-  else {
-    TypesMgr::TypeId t1 = getTypeDecor(ctx->type());
-    Symbols.addLocalVar(ident, t1);
-  }
+
   DEBUG_EXIT();
   return 0;
 }

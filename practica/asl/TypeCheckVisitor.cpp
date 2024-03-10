@@ -328,6 +328,23 @@ antlrcpp::Any TypeCheckVisitor::visitUnary(AslParser::UnaryContext *ctx){ //2 ca
       putTypeDecor(ctx, t);
     }
   }
+  else if (ctx -> PLUS()){
+    visit(ctx->expr());
+    TypesMgr::TypeId t1 = getTypeDecor(ctx->expr());
+
+    if (((not Types.isErrorTy(t1)) and (not Types.isNumericTy(t1))))
+      Errors.incompatibleOperator(ctx->op);
+
+    if(Types.isFloatTy(t1)){
+      TypesMgr::TypeId t = Types.createFloatTy();
+      putTypeDecor(ctx, t);
+    }
+    else{
+      TypesMgr::TypeId t = Types.createIntegerTy();
+      putTypeDecor(ctx, t);
+    }
+
+  }
   putIsLValueDecor(ctx, false);
   DEBUG_EXIT();
   return 0;
@@ -345,8 +362,8 @@ antlrcpp::Any TypeCheckVisitor::visitParenthesis(AslParser::ParenthesisContext *
 antlrcpp::Any TypeCheckVisitor::visitLogical(AslParser::LogicalContext *ctx){ //AND y OR, solo pueden ser con BOOLS: isBooleanTy()
   DEBUG_ENTER();
   visit(ctx->expr(0));
-  TypesMgr::TypeId t1 = getTypeDecor(ctx->expr(0));
   visit(ctx->expr(1));
+  TypesMgr::TypeId t1 = getTypeDecor(ctx->expr(0));
   TypesMgr::TypeId t2 = getTypeDecor(ctx->expr(1));
 
   if (((not Types.isErrorTy(t1)) and (not Types.isBooleanTy(t1))) or

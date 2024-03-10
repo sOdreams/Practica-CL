@@ -51,14 +51,15 @@ declarations
         : (variable_decl)*
         ;
 
+//Puedo poner una ID, pero si decido poner mas, antes habrá una coma, seguido del tipaje
 variable_decl
-        : VAR ID ':' type
+        : VAR ID (',' ID)* ':' type
         ;
 
 type    : INT
-        |BOOL
-        |FLOAT
-        |CHAR
+        | BOOL
+        | FLOAT
+        | CHAR
         ;
 
 statements
@@ -88,17 +89,14 @@ left_expr
 
 // Grammar for expressions with boolean, relational and aritmetic operators
 
-expr    : op=(NOT|MINUS) expr                               # unary
-        | LPAR expr RPAR                                    # parenthesis
+expr    : LPAR expr RPAR                                    # parenthesis
+        | op=(NOT|MINUS|PLUS) expr                          # unary
         | expr op=(MUL|DIV) expr                            # arithmetic
         | expr op=(PLUS|MINUS) expr                         # arithmetic
         | expr op=(EQUAL|NEQ|GT|GE|LT|LE) expr              # relational
         | expr op=AND expr                                  # logical
         | expr op=OR expr                                   # logical
-        | INTVAL                                            # value
-        | FLOATVAL                                          # value
-        | BOOLVAL                                           # value
-        | CHARVAL                                           # value
+        | (INTVAL | FLOATVAL | BOOLVAL | CHARVAL)           # value
         | ident                                             # exprIdent
         ;
 
@@ -139,12 +137,16 @@ FUNC      : 'func' ;
 ENDFUNC   : 'endfunc' ;
 READ      : 'read' ;
 WRITE     : 'write' ;
-ID        : ('a'..'z'|'A'..'Z') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')* ; //identificadors, sempre declarats despres de les paraules clau
+
 
 INTVAL    : ('0'..'9')+ ;
 BOOLVAL   : ('true'|'false');
 FLOATVAL  : ('0'..'9')+ ('.') ('0'..'9')+;
 CHARVAL   : '\'' ( ESC_SEQ | ~('\\'|'"') ) '\'';
+
+
+
+ID        : ('a'..'z'|'A'..'Z') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')* ; //identificadors, sempre declarats despres de les paraules clau
 
 // Strings (in quotes) with escape sequences
 STRING    : '"' ( ESC_SEQ | ~('\\'|'"') )* '"' ;
