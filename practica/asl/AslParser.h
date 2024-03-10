@@ -15,9 +15,10 @@ public:
     T__0 = 1, T__1 = 2, T__2 = 3, ASSIGN = 4, EQUAL = 5, NEQ = 6, GT = 7, 
     GE = 8, LE = 9, LT = 10, NOT = 11, AND = 12, OR = 13, MINUS = 14, DIV = 15, 
     LPAR = 16, RPAR = 17, PLUS = 18, MUL = 19, VAR = 20, INT = 21, BOOL = 22, 
-    FLOAT = 23, CHAR = 24, IF = 25, THEN = 26, ELSE = 27, ENDIF = 28, FUNC = 29, 
-    ENDFUNC = 30, READ = 31, WRITE = 32, INTVAL = 33, BOOLVAL = 34, FLOATVAL = 35, 
-    CHARVAL = 36, ID = 37, STRING = 38, COMMENT = 39, WS = 40
+    FLOAT = 23, CHAR = 24, IF = 25, THEN = 26, ELSE = 27, ENDIF = 28, WHILE = 29, 
+    DO = 30, ENDWHILE = 31, RETURN = 32, FUNC = 33, ENDFUNC = 34, READ = 35, 
+    WRITE = 36, INTVAL = 37, BOOLVAL = 38, FLOATVAL = 39, CHARVAL = 40, 
+    ID = 41, STRING = 42, COMMENT = 43, WS = 44
   };
 
   enum {
@@ -158,12 +159,33 @@ public:
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
+  class  ReturnCallContext : public StatementContext {
+  public:
+    ReturnCallContext(StatementContext *ctx);
+
+    antlr4::tree::TerminalNode *RETURN();
+    ExprContext *expr();
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
   class  WriteExprContext : public StatementContext {
   public:
     WriteExprContext(StatementContext *ctx);
 
     antlr4::tree::TerminalNode *WRITE();
     ExprContext *expr();
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
+  class  WhileStmtContext : public StatementContext {
+  public:
+    WhileStmtContext(StatementContext *ctx);
+
+    antlr4::tree::TerminalNode *WHILE();
+    ExprContext *expr();
+    antlr4::tree::TerminalNode *DO();
+    StatementsContext *statements();
+    antlr4::tree::TerminalNode *ENDWHILE();
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
@@ -174,8 +196,10 @@ public:
     antlr4::tree::TerminalNode *IF();
     ExprContext *expr();
     antlr4::tree::TerminalNode *THEN();
-    StatementsContext *statements();
+    std::vector<StatementsContext *> statements();
+    StatementsContext* statements(size_t i);
     antlr4::tree::TerminalNode *ENDIF();
+    antlr4::tree::TerminalNode *ELSE();
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 

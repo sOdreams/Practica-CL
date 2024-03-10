@@ -137,16 +137,44 @@ antlrcpp::Any TypeCheckVisitor::visitAssignStmt(AslParser::AssignStmtContext *ct
   return 0;
 }
 
+
+//IF expr THEN statements (ELSE statements)? ENDIF       # ifStmt
+
 antlrcpp::Any TypeCheckVisitor::visitIfStmt(AslParser::IfStmtContext *ctx) {
   DEBUG_ENTER();
+  visit(ctx->expr());
+  //decora la expresion (debe ser de tipo BOOL)
+  TypesMgr::TypeId t1 = getTypeDecor(ctx->expr());
+
+  if ((not Types.isErrorTy(t1)) and (not Types.isBooleanTy(t1)))
+    Errors.booleanRequired(ctx);
+  visit(ctx->statements(0)); //hay dos statements el del if y el del else
+
+  //caso de que haya un ELSE
+  if(ctx->ELSE()){
+    visit(ctx->statements(1));
+  }
+
+  DEBUG_EXIT();
+  return 0;
+}
+
+
+//WHILE expr DO statements ENDWHILE                       #whileStmt
+
+antlrcpp::Any TypeCheckVisitor::visitWhileStmt(AslParser::WhileStmtContext *ctx) {
+  DEBUG_ENTER();
+  //comprueba que la expresion sea BOOLEAN
   visit(ctx->expr());
   TypesMgr::TypeId t1 = getTypeDecor(ctx->expr());
   if ((not Types.isErrorTy(t1)) and (not Types.isBooleanTy(t1)))
     Errors.booleanRequired(ctx);
+
   visit(ctx->statements());
   DEBUG_EXIT();
   return 0;
 }
+
 
 antlrcpp::Any TypeCheckVisitor::visitProcCall(AslParser::ProcCallContext *ctx) {
   DEBUG_ENTER();
@@ -157,6 +185,17 @@ antlrcpp::Any TypeCheckVisitor::visitProcCall(AslParser::ProcCallContext *ctx) {
   } else if (not Types.isFunctionTy(t1)) {
     Errors.isNotCallable(ctx->ident());
   }
+  DEBUG_EXIT();
+  return 0;
+}
+
+
+antlrcpp::Any TypeCheckVisitor::visitReturnCall(AslParser::ReturnCallContext *ctx) {
+  DEBUG_ENTER();
+  //para el ejercicio 3, las funciones o hacen return (void) o no hacen return.
+  //esta funcion tiene pinta de que habrá que ver primero de que tipo retorna la funcion en la
+  //que se llama el return. luego habra que ver que haya match entre el tipo que retorna la funcion (void o etc)
+  //y el return
   DEBUG_EXIT();
   return 0;
 }

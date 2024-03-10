@@ -35,7 +35,11 @@ public:
 
     virtual antlrcpp::Any visitIfStmt(AslParser::IfStmtContext *context) = 0;
 
+    virtual antlrcpp::Any visitWhileStmt(AslParser::WhileStmtContext *context) = 0;
+
     virtual antlrcpp::Any visitProcCall(AslParser::ProcCallContext *context) = 0;
+
+    virtual antlrcpp::Any visitReturnCall(AslParser::ReturnCallContext *context) = 0;
 
     virtual antlrcpp::Any visitReadStmt(AslParser::ReadStmtContext *context) = 0;
 

@@ -70,14 +70,32 @@ statements
 statement
           // Assignment
         : left_expr ASSIGN expr ';'           # assignStmt
-          // if-then-else statement (else is optional)
-        | IF expr THEN statements ENDIF       # ifStmt
+
+
+          // if-then-else statements (else is optional)
+        | IF expr THEN statements (ELSE statements)? ENDIF       # ifStmt
+
+
+         // while do statement
+        | WHILE expr DO statements ENDWHILE                       #whileStmt
+
+
           // A function/procedure call has a list of arguments in parenthesis (possibly empty)
         | ident '(' ')' ';'                   # procCall
+
+
+        //return (optional expr)
+        | RETURN expr? ';'                         #returnCall
+
+
           // Read a variable
         | READ left_expr ';'                  # readStmt
+
+
           // Write an expression
         | WRITE expr ';'                      # writeExpr
+
+
           // Write a string
         | WRITE STRING ';'                    # writeString
         ;
@@ -133,6 +151,10 @@ IF        : 'if' ;
 THEN      : 'then' ;
 ELSE      : 'else' ;
 ENDIF     : 'endif' ;
+WHILE     : 'while' ;
+DO        : 'do' ;
+ENDWHILE  : 'endwhile';
+RETURN    : 'return';
 FUNC      : 'func' ;
 ENDFUNC   : 'endfunc' ;
 READ      : 'read' ;
