@@ -196,6 +196,33 @@ antlrcpp::Any TypeCheckVisitor::visitReturnCall(AslParser::ReturnCallContext *ct
   //esta funcion tiene pinta de que habrá que ver primero de que tipo retorna la funcion en la
   //que se llama el return. luego habra que ver que haya match entre el tipo que retorna la funcion (void o etc)
   //y el return
+
+  //modificacion para el ejercicio 4, que haya match entre return call y return de la funcion
+  //funciones que creo que son relevantes del typemgr --> getFuncReturnType
+  // funciones para saber la funcion actual --> Symbols
+  
+
+  
+
+  // if(ctx->expr()) { //si es un return con expresion , tiene que hacer match con el return de la funcion, si es sin expresion, tiene que hacer match con void
+  //   visit(ctx->expr());
+  //   TypeMgr::TypeId tipoReturnFuncion = Types.getFuncReturnType(func_actual_name);
+  //   TypesMgr::TypeId tipoReturn = getTypeDecor(ctx->expr());
+
+  //   //si tipoReturnFunction es error -->es void y tipoReturn no es error --> no es void --> error
+  //   //casos en el que alguno de los dos es error (void) y otro no
+  //   if(Types.isErrorTy(tipoReturnFuncion) && not Types.isErrorTy(tipoReturn)) {
+  //     Errors.incompatibleReturn(ctx->RETURN());
+  //   }
+  //   if(Types.isErrorTy(tipoReturn) && not Types.isErrorTy(tipoReturnFuncion)){
+  //     Errors.incompatibleReturn(ctx->RETURN());
+  //   }
+  //   if(not Types.equalTypes(tipoReturn,tipoReturnFuncion)){
+  //     Errors.incompatibleReturn(ctx->RETURN());
+  //   }
+  //   //casos en los que no son void, pero tiene que haber match de tipaje
+
+  
   DEBUG_EXIT();
   return 0;
 }

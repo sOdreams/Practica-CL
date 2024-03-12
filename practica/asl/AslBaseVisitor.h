@@ -23,6 +23,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitParameters(AslParser::ParametersContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitDeclarations(AslParser::DeclarationsContext *ctx) override {
     return visitChildren(ctx);
   }

@@ -22,9 +22,9 @@ public:
   };
 
   enum {
-    RuleProgram = 0, RuleFunction = 1, RuleDeclarations = 2, RuleVariable_decl = 3, 
-    RuleType = 4, RuleStatements = 5, RuleStatement = 6, RuleLeft_expr = 7, 
-    RuleExpr = 8, RuleIdent = 9
+    RuleProgram = 0, RuleFunction = 1, RuleParameters = 2, RuleDeclarations = 3, 
+    RuleVariable_decl = 4, RuleType = 5, RuleStatements = 6, RuleStatement = 7, 
+    RuleLeft_expr = 8, RuleExpr = 9, RuleIdent = 10
   };
 
   AslParser(antlr4::TokenStream *input);
@@ -39,6 +39,7 @@ public:
 
   class ProgramContext;
   class FunctionContext;
+  class ParametersContext;
   class DeclarationsContext;
   class Variable_declContext;
   class TypeContext;
@@ -69,16 +70,33 @@ public:
     antlr4::tree::TerminalNode *FUNC();
     antlr4::tree::TerminalNode *ID();
     antlr4::tree::TerminalNode *LPAR();
+    ParametersContext *parameters();
     antlr4::tree::TerminalNode *RPAR();
     DeclarationsContext *declarations();
     StatementsContext *statements();
     antlr4::tree::TerminalNode *ENDFUNC();
+    TypeContext *type();
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
    
   };
 
   FunctionContext* function();
+
+  class  ParametersContext : public antlr4::ParserRuleContext {
+  public:
+    ParametersContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    std::vector<antlr4::tree::TerminalNode *> ID();
+    antlr4::tree::TerminalNode* ID(size_t i);
+    std::vector<TypeContext *> type();
+    TypeContext* type(size_t i);
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  ParametersContext* parameters();
 
   class  DeclarationsContext : public antlr4::ParserRuleContext {
   public:

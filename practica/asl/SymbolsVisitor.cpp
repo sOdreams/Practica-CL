@@ -74,12 +74,19 @@ antlrcpp::Any SymbolsVisitor::visitProgram(AslParser::ProgramContext *ctx) {
   return 0;
 }
 
+
+
+
+
+
 antlrcpp::Any SymbolsVisitor::visitFunction(AslParser::FunctionContext *ctx) {
   DEBUG_ENTER();
   std::string funcName = ctx->ID()->getText();
   SymTable::ScopeId sc = Symbols.pushNewScope(funcName);
   putScopeDecor(ctx, sc);
+  visit(ctx->parameters()); //nueva linea!
   visit(ctx->declarations());
+
   // Symbols.print();
   Symbols.popScope();
   std::string ident = ctx->ID()->getText();
@@ -88,13 +95,49 @@ antlrcpp::Any SymbolsVisitor::visitFunction(AslParser::FunctionContext *ctx) {
   }
   else {
     std::vector<TypesMgr::TypeId> lParamsTy;
-    TypesMgr::TypeId tRet = Types.createVoidTy();
+    for(unsigned long int i = 0; i < ctx->parameters()->ID().size() ;++i){
+      lParamsTy.push_back(getTypeDecor(ctx->parameters()->type(i)));
+    }
+    //mirar el types ctx->types()... y dependiendo de eso poner un return adecuado?
+    TypesMgr::TypeId tRet = Types.createVoidTy(); //POR DEFECTO
+    if(ctx->type()) { //si hay valor de retorno
+      visit(ctx->type());
+      tRet = getTypeDecor(ctx->type());
+    }
+
     TypesMgr::TypeId tFunc = Types.createFunctionTy(lParamsTy, tRet);
     Symbols.addFunction(ident, tFunc);
   }
   DEBUG_EXIT();
   return 0;
 }
+
+
+antlrcpp::Any SymbolsVisitor::visitParameters(AslParser::ParametersContext *ctx){
+  //hay que ver que no pase lo siguiente (a: int, a :int), luego dentro del propio stament no puede haber otra declaracion de 'a' si 'a' es paramentro de entrada 
+  DEBUG_ENTER(); 
+
+
+  for(unsigned long int i = 0; i < ctx->type().size(); ++i){
+      visit(ctx->type(i));
+
+      std::string ident = ctx->ID(i)->getText();
+      if (Symbols.findInCurrentScope(ident)) {
+        Errors.declaredIdent(ctx->ID(i));
+      }
+      else {
+        TypesMgr::TypeId t1 = getTypeDecor(ctx->type(i));
+        Symbols.addParameter(ident, t1);
+      }
+
+  }
+
+  DEBUG_EXIT();
+  return 0;
+}
+
+
+
 
 antlrcpp::Any SymbolsVisitor::visitDeclarations(AslParser::DeclarationsContext *ctx) {
   DEBUG_ENTER();
