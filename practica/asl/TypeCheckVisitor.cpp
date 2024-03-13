@@ -190,6 +190,51 @@ antlrcpp::Any TypeCheckVisitor::visitProcCall(AslParser::ProcCallContext *ctx) {
 }
 
 
+
+// ident LCOR expr RCOR       # left_array_acces
+antlrcpp::Any TypeCheckVisitor::visitLeft_array_acces(AslParser::Left_array_accesContext *ctx){
+  DEBUG_ENTER();
+  visit(ctx->ident());
+  TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());
+  visit(ctx->expr());
+  TypesMgr::TypeId t2 = getTypeDecor(ctx->expr());
+
+  if(((not Types.isErrorTy(t1)) and (not Types.isArrayTy(t1))))
+      Errors.nonArrayInArrayAccess(ctx->ident());
+  
+  if (((not Types.isErrorTy(t2)) and (not Types.isNumericTy(t2))))
+    Errors.nonIntegerIndexInArrayAccess(ctx->expr());
+
+  putTypeDecor(ctx, t1);
+  bool b = getIsLValueDecor(ctx->ident());
+  putIsLValueDecor(ctx, b);
+  DEBUG_EXIT();
+  return 0;
+}
+
+// ident LCOR expr RCOR       # expr_array_acces
+antlrcpp::Any TypeCheckVisitor::visitExpr_array_acces(AslParser::Expr_array_accesContext *ctx){
+DEBUG_ENTER();
+  visit(ctx->ident());
+  TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());
+  visit(ctx->expr());
+  TypesMgr::TypeId t2 = getTypeDecor(ctx->expr());
+
+  if(((not Types.isErrorTy(t1)) and (not Types.isArrayTy(t1))))
+      Errors.nonArrayInArrayAccess(ctx->ident());
+  
+  if (((not Types.isErrorTy(t2)) and (not Types.isNumericTy(t2))))
+    Errors.nonIntegerIndexInArrayAccess(ctx->expr());
+
+  putTypeDecor(ctx, t1);
+  bool b = getIsLValueDecor(ctx->ident());
+  putIsLValueDecor(ctx, b);
+  DEBUG_EXIT();
+  return 0;
+}
+
+
+
 antlrcpp::Any TypeCheckVisitor::visitReturnCall(AslParser::ReturnCallContext *ctx) {
   DEBUG_ENTER();
   //para el ejercicio 3, las funciones o hacen return (void) o no hacen return.
@@ -257,7 +302,7 @@ antlrcpp::Any TypeCheckVisitor::visitWriteExpr(AslParser::WriteExprContext *ctx)
 //   return r;
 // }
 
-antlrcpp::Any TypeCheckVisitor::visitLeft_expr(AslParser::Left_exprContext *ctx) {
+antlrcpp::Any TypeCheckVisitor::visitJust_ident(AslParser::Just_identContext *ctx) {
   DEBUG_ENTER();
   visit(ctx->ident());
   TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());

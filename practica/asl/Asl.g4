@@ -105,7 +105,8 @@ statement
 
 // Grammar for left expressions (l-values in C++)
 left_expr
-        : ident
+        : ident                      # just_ident
+        | ident LCOR expr RCOR       # left_array_acces
         ;
 
 // Grammar for expressions with boolean, relational and aritmetic operators
@@ -115,6 +116,7 @@ expr    : LPAR expr RPAR                                    # parenthesis
         | expr op=(MUL|DIV) expr                            # arithmetic
         | expr op=(PLUS|MINUS) expr                         # arithmetic
         | expr op=(EQUAL|NEQ|GT|GE|LT|LE) expr              # relational
+        | ident LCOR expr RCOR                              # expr_array_acces
         | expr op=AND expr                                  # logical
         | expr op=OR expr                                   # logical
         | (INTVAL | FLOATVAL | BOOLVAL | CHARVAL)           # value
@@ -143,6 +145,8 @@ MINUS     : '-' ;
 DIV       : '/' ;
 LPAR      : '(';
 RPAR      : ')';
+LCOR      : '[';
+RCOR      : ']';
 PLUS      : '+' ;
 MUL       : '*';
 VAR       : 'var';

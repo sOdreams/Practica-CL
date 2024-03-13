@@ -75,7 +75,15 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitLeft_expr(AslParser::Left_exprContext *ctx) override {
+  virtual antlrcpp::Any visitJust_ident(AslParser::Just_identContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitLeft_array_acces(AslParser::Left_array_accesContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitExpr_array_acces(AslParser::Expr_array_accesContext *ctx) override {
     return visitChildren(ctx);
   }
 

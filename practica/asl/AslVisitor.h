@@ -49,7 +49,11 @@ public:
 
     virtual antlrcpp::Any visitWriteString(AslParser::WriteStringContext *context) = 0;
 
-    virtual antlrcpp::Any visitLeft_expr(AslParser::Left_exprContext *context) = 0;
+    virtual antlrcpp::Any visitJust_ident(AslParser::Just_identContext *context) = 0;
+
+    virtual antlrcpp::Any visitLeft_array_acces(AslParser::Left_array_accesContext *context) = 0;
+
+    virtual antlrcpp::Any visitExpr_array_acces(AslParser::Expr_array_accesContext *context) = 0;
 
     virtual antlrcpp::Any visitExprIdent(AslParser::ExprIdentContext *context) = 0;
 

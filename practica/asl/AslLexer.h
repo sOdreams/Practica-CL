@@ -14,11 +14,11 @@ public:
   enum {
     T__0 = 1, T__1 = 2, T__2 = 3, ASSIGN = 4, EQUAL = 5, NEQ = 6, GT = 7, 
     GE = 8, LE = 9, LT = 10, NOT = 11, AND = 12, OR = 13, MINUS = 14, DIV = 15, 
-    LPAR = 16, RPAR = 17, PLUS = 18, MUL = 19, VAR = 20, INT = 21, BOOL = 22, 
-    FLOAT = 23, CHAR = 24, IF = 25, THEN = 26, ELSE = 27, ENDIF = 28, WHILE = 29, 
-    DO = 30, ENDWHILE = 31, RETURN = 32, FUNC = 33, ENDFUNC = 34, READ = 35, 
-    WRITE = 36, INTVAL = 37, BOOLVAL = 38, FLOATVAL = 39, CHARVAL = 40, 
-    ID = 41, STRING = 42, COMMENT = 43, WS = 44
+    LPAR = 16, RPAR = 17, LCOR = 18, RCOR = 19, PLUS = 20, MUL = 21, VAR = 22, 
+    INT = 23, BOOL = 24, FLOAT = 25, CHAR = 26, IF = 27, THEN = 28, ELSE = 29, 
+    ENDIF = 30, WHILE = 31, DO = 32, ENDWHILE = 33, RETURN = 34, FUNC = 35, 
+    ENDFUNC = 36, READ = 37, WRITE = 38, INTVAL = 39, BOOLVAL = 40, FLOATVAL = 41, 
+    CHARVAL = 42, ID = 43, STRING = 44, COMMENT = 45, WS = 46
   };
 
   AslLexer(antlr4::CharStream *input);
