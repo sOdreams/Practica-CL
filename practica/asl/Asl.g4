@@ -117,6 +117,7 @@ expr    : LPAR expr RPAR                                    # parenthesis
         | expr op=(PLUS|MINUS) expr                         # arithmetic
         | expr op=(EQUAL|NEQ|GT|GE|LT|LE) expr              # relational
         | ident LCOR expr RCOR                              # expr_array_acces
+        | ident LPAR (expr (',' expr)*)? RPAR               # func_call
         | expr op=AND expr                                  # logical
         | expr op=OR expr                                   # logical
         | (INTVAL | FLOATVAL | BOOLVAL | CHARVAL)           # value

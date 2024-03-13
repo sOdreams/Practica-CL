@@ -90,6 +90,10 @@ public:
   antlrcpp::Any visitParenthesis(AslParser::ParenthesisContext *ctx);
 
   antlrcpp::Any visitExpr_array_acces(AslParser::Expr_array_accesContext *ctx);
+  antlrcpp::Any visitFunc_call(AslParser::Func_callContext *ctx);
+
+  antlrcpp::Any visitLeft_array_acces(AslParser::Left_array_accesContext *ctx);
+
 
 
 private:

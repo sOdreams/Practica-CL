@@ -107,6 +107,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitFunc_call(AslParser::Func_callContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitValue(AslParser::ValueContext *ctx) override {
     return visitChildren(ctx);
   }

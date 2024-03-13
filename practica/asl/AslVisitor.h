@@ -65,6 +65,8 @@ public:
 
     virtual antlrcpp::Any visitParenthesis(AslParser::ParenthesisContext *context) = 0;
 
+    virtual antlrcpp::Any visitFunc_call(AslParser::Func_callContext *context) = 0;
+
     virtual antlrcpp::Any visitValue(AslParser::ValueContext *context) = 0;
 
     virtual antlrcpp::Any visitLogical(AslParser::LogicalContext *context) = 0;
