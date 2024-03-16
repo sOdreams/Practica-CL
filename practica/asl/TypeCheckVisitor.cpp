@@ -487,46 +487,49 @@ antlrcpp::Any TypeCheckVisitor::visitLogical(AslParser::LogicalContext *ctx){ //
   DEBUG_EXIT();
   return 0;
 }
-//677454662
-
-
-//| ident LPAR (expr (',' expr)*)? RPAR               # func_call
-antlrcpp::Any TypeCheckVisitor::visitFunc_call(AslParser::Func_callContext *ctx){
-DEBUG_ENTER();
-  visit(ctx->ident());
-  TypesMgr::TypeId FuncID = getTypeDecor(ctx->ident());
-
-  if(((not Types.isErrorTy(FuncID)) and (not Types.isFunctionTy(FuncID))))
-      Errors.isNotFunction(ctx->ident());
-
-  //ahora hay que ver que los argumentos (si es que tiene), haga match con los tipos de los argumentos de la funcion a la que llama
-  std::vector<TypesMgr::TypeId> ParametrosFunction = Types.getFuncParamsTypes(FuncID);
-
-  if(ctx->expr().size() != ParametrosFunction.size()){
-    Errors.numberOfParameters(ctx->ident());
-  }
-
-  for(unsigned long int i = 0; i < ctx->expr().size();++i){
-    visit(ctx->expr(i));
-    TypesMgr::TypeId typeExpr = getTypeDecor(ctx->expr(i));
+antlrcpp::Any TypeCheckVisitor::visitFunc_call(AslParser::Func_callContext *ctx) {
+    DEBUG_ENTER();
     
-    if(not Types.equalTypes(typeExpr,ParametrosFunction[i])){
-      Errors.incompatibleParameter(ctx->expr(i),ctx->expr().size(),ctx->ident());
-    }
-  }
+    // Visit and evaluate the identifier
+    visit(ctx->ident());
+    TypesMgr::TypeId FuncID = getTypeDecor(ctx->ident());
 
-  //coger el return de la funcion y decorarlo, si el return es void pues error
+    // Check if FuncID corresponds to a function
+    if (Types.isFunctionTy(FuncID)) {
+        // Get the expected parameter types of the function
+        std::vector<TypesMgr::TypeId> ParametrosFunction = Types.getFuncParamsTypes(FuncID);
 
+        // Check if the number of parameters matches
+        if (ctx->expr().size() != ParametrosFunction.size()) {
+            Errors.numberOfParameters(ctx->ident());
+        }
 
-  // A = EXPR ---> expr no puede ser VOID
-  TypesMgr::TypeId tipoReturn = Types.getFuncReturnType(FuncID);
-  if(Types.isVoidFunction(FuncID))
-    Errors.isNotCallable(ctx->ident());
+        // Check the type compatibility of each parameter
+        for (unsigned long int i = 0; i < ctx->expr().size(); ++i) {
+            visit(ctx->expr(i));
+            TypesMgr::TypeId typeExpr = getTypeDecor(ctx->expr(i));
 
-  putTypeDecor(ctx, tipoReturn);
-  putIsLValueDecor(ctx, false);
-  DEBUG_EXIT();
-  return 0;
+            if (!Types.equalTypes(typeExpr, ParametrosFunction[i])) {
+                Errors.incompatibleParameter(ctx->expr(i), ctx->expr().size(), ctx->ident());
+            }
+        }
+
+        // Get the return type of the function
+        TypesMgr::TypeId tipoReturn = Types.getFuncReturnType(FuncID);
+        
+        // Check if the function returns void
+        if (Types.isVoidFunction(FuncID)) {
+            Errors.isNotCallable(ctx->ident());
+        }
+
+        // Decorate the return type
+        putTypeDecor(ctx, tipoReturn);
+        putIsLValueDecor(ctx, false);
+    } else  if(((not Types.isErrorTy(FuncID)) and (not Types.isFunctionTy(FuncID)))){
+        Errors.isNotFunction(ctx->ident());}
+
+    DEBUG_EXIT();
+    return 0;
 }
 
 
