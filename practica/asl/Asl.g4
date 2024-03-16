@@ -101,6 +101,9 @@ statement
 
           // Write a string
         | WRITE STRING ';'                    # writeString
+
+                //para el ejercicio 8, es poder hacer llamadas a funciones tal cual sin asignaciones
+        | ident LPAR (expr (',' expr)*)? RPAR   ';'           # procedure_call
         ;
 
 // Grammar for left expressions (l-values in C++)

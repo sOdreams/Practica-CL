@@ -487,6 +487,7 @@ antlrcpp::Any TypeCheckVisitor::visitLogical(AslParser::LogicalContext *ctx){ //
   DEBUG_EXIT();
   return 0;
 }
+
 antlrcpp::Any TypeCheckVisitor::visitFunc_call(AslParser::Func_callContext *ctx) {
     DEBUG_ENTER();
     
@@ -496,6 +497,15 @@ antlrcpp::Any TypeCheckVisitor::visitFunc_call(AslParser::Func_callContext *ctx)
 
     // Check if FuncID corresponds to a function
     if (Types.isFunctionTy(FuncID)) {
+
+        // Get the return type of the function
+        TypesMgr::TypeId tipoReturn = Types.getFuncReturnType(FuncID);
+        
+        // Check if the function returns void
+        if (Types.isVoidFunction(FuncID)) {
+            Errors.isNotCallable(ctx->ident());
+        }
+
         // Get the expected parameter types of the function
         std::vector<TypesMgr::TypeId> ParametrosFunction = Types.getFuncParamsTypes(FuncID);
 
@@ -514,12 +524,50 @@ antlrcpp::Any TypeCheckVisitor::visitFunc_call(AslParser::Func_callContext *ctx)
             }
         }
 
+        // Decorate the return type
+        putTypeDecor(ctx, tipoReturn);
+        putIsLValueDecor(ctx, false);
+    } else  if(not Types.isErrorTy(FuncID) and not Types.isFunctionTy(FuncID)){
+        Errors.isNotFunction(ctx->ident());}
+
+    DEBUG_EXIT();
+    return 0;
+}
+
+antlrcpp::Any TypeCheckVisitor::visitProcedure_call(AslParser::Procedure_callContext *ctx) {
+    DEBUG_ENTER();
+    
+    // Visit and evaluate the identifier
+    visit(ctx->ident());
+    TypesMgr::TypeId FuncID = getTypeDecor(ctx->ident());
+
+    // Check if FuncID corresponds to a function
+    if (Types.isFunctionTy(FuncID)) {
+
         // Get the return type of the function
         TypesMgr::TypeId tipoReturn = Types.getFuncReturnType(FuncID);
         
-        // Check if the function returns void
-        if (Types.isVoidFunction(FuncID)) {
-            Errors.isNotCallable(ctx->ident());
+        // // Check if the function returns void
+        // if (Types.isVoidFunction(FuncID)) {
+        //     Errors.isNotCallable(ctx->ident());
+        // } AHORA SI PUEDE SER VOID, DE HECHO DEBERIA SER VOID
+
+        // Get the expected parameter types of the function
+        std::vector<TypesMgr::TypeId> ParametrosFunction = Types.getFuncParamsTypes(FuncID);
+
+        // Check if the number of parameters matches
+        if (ctx->expr().size() != ParametrosFunction.size()) {
+            Errors.numberOfParameters(ctx->ident());
+        }
+
+        // Check the type compatibility of each parameter
+        for (unsigned long int i = 0; i < ctx->expr().size(); ++i) {
+            visit(ctx->expr(i));
+            TypesMgr::TypeId typeExpr = getTypeDecor(ctx->expr(i));
+
+            if (!Types.equalTypes(typeExpr, ParametrosFunction[i])) {
+                Errors.incompatibleParameter(ctx->expr(i), ctx->expr().size(), ctx->ident());
+            }
         }
 
         // Decorate the return type
@@ -531,8 +579,6 @@ antlrcpp::Any TypeCheckVisitor::visitFunc_call(AslParser::Func_callContext *ctx)
     DEBUG_EXIT();
     return 0;
 }
-
-
 
 
 // Getters for the necessary tree node atributes:

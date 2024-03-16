@@ -75,6 +75,10 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitProcedure_call(AslParser::Procedure_callContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitJust_ident(AslParser::Just_identContext *ctx) override {
     return visitChildren(ctx);
   }
