@@ -31,6 +31,10 @@ public:
 
     virtual antlrcpp::Any visitType(AslParser::TypeContext *context) = 0;
 
+    virtual antlrcpp::Any visitArray_type(AslParser::Array_typeContext *context) = 0;
+
+    virtual antlrcpp::Any visitBasic_type(AslParser::Basic_typeContext *context) = 0;
+
     virtual antlrcpp::Any visitStatements(AslParser::StatementsContext *context) = 0;
 
     virtual antlrcpp::Any visitAssignStmt(AslParser::AssignStmtContext *context) = 0;

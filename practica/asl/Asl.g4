@@ -44,7 +44,7 @@ program : function+ EOF
 
 // A function has a name, a list of parameters and a list of statements
 function
-        : FUNC ID '('parameters')' (':' type)? declarations statements ENDFUNC
+        : FUNC ID '('parameters')' (':' basic_type)? declarations statements ENDFUNC
         ;
 
 parameters
@@ -59,11 +59,19 @@ variable_decl
         : VAR ID (',' ID)* ':' type
         ;
 
-type    : INT
+type    : basic_type
+        | array_type
+        ;
+
+array_type : ARRAY LCOR INTVAL RCOR OF basic_type
+         ;
+basic_type  
+        : INT
         | BOOL
         | FLOAT
         | CHAR
         ;
+
 
 statements
         : (statement)*
@@ -72,35 +80,35 @@ statements
 // The different types of instructions
 statement
           // Assignment
-        : left_expr ASSIGN expr ';'           # assignStmt
+        : left_expr ASSIGN expr ';'                                     # assignStmt
 
 
           // if-then-else statements (else is optional)
-        | IF expr THEN statements (ELSE statements)? ENDIF       # ifStmt
+        | IF expr THEN statements (ELSE statements)? ENDIF               # ifStmt
 
 
          // while do statement
-        | WHILE expr DO statements ENDWHILE                       #whileStmt
+        | WHILE expr DO statements ENDWHILE                              #whileStmt
 
 
           // A function/procedure call has a list of arguments in parenthesis (possibly empty)
-        | ident LPAR (expr (',' expr)*)? RPAR   ';'                  # procCall
+        | ident LPAR (expr (',' expr)*)? RPAR   ';'                       # procCall
 
 
         //return (optional expr)
-        | RETURN expr? ';'                         #returnCall
+        | RETURN expr? ';'                                                 #returnCall
 
 
           // Read a variable
-        | READ left_expr ';'                  # readStmt
+        | READ left_expr ';'                                              # readStmt
 
 
           // Write an expression
-        | WRITE expr ';'                      # writeExpr
+        | WRITE expr ';'                                                 # writeExpr
 
 
           // Write a string
-        | WRITE STRING ';'                    # writeString
+        | WRITE STRING ';'                                              # writeString
 
 //                //para el ejercicio 8, es poder hacer llamadas a funciones tal cual sin asignaciones
 //               | ident LPAR (expr (',' expr)*)? RPAR   ';'           # procedure_call
@@ -136,47 +144,48 @@ ident   : ID
 /// Lexer Rules
 //////////////////////////////////////////////////
 
-ASSIGN    : '=' ;
-EQUAL     : '==' ;
-NEQ       : '!=' ;
-GT        : '>' ;
-GE        : '>=' ;
-LE        : '<=' ;
-LT        : '<' ;
-NOT       : 'not' ;
-AND       : 'and' ;
-OR        : 'or' ;
-MINUS     : '-' ;
-DIV       : '/' ;
-LPAR      : '(';
-RPAR      : ')';
-LCOR      : '[';
-RCOR      : ']';
-PLUS      : '+' ;
-MUL       : '*';
-VAR       : 'var';
-INT       : 'int';
-BOOL      : 'bool';
-FLOAT     : 'float';
-CHAR      : 'char';
-IF        : 'if' ;
-THEN      : 'then' ;
-ELSE      : 'else' ;
-ENDIF     : 'endif' ;
-WHILE     : 'while' ;
-DO        : 'do' ;
-ENDWHILE  : 'endwhile';
-RETURN    : 'return';
-FUNC      : 'func' ;
-ENDFUNC   : 'endfunc' ;
-READ      : 'read' ;
-WRITE     : 'write' ;
+ASSIGN    : '='         ;
+EQUAL     : '=='        ;
+NEQ       : '!='        ;
+GT        : '>'         ;
+GE        : '>='        ;
+LE        : '<='        ;
+LT        : '<'         ;
+NOT       : 'not'       ;
+AND       : 'and'       ;
+OR        : 'or'        ;
+MINUS     : '-'         ;
+DIV       : '/'         ;
+LPAR      : '('         ;
+RPAR      : ')'         ;
+LCOR      : '['         ;
+RCOR      : ']'         ;
+PLUS      : '+'         ;
+MUL       : '*'         ;
+VAR       : 'var'       ;
+INT       : 'int'       ;
+BOOL      : 'bool'      ;
+FLOAT     : 'float'     ;
+CHAR      : 'char'      ;
+IF        : 'if'        ;
+THEN      : 'then'      ;
+ELSE      : 'else'      ;
+ENDIF     : 'endif'     ;
+WHILE     : 'while'     ;
+DO        : 'do'        ;
+ENDWHILE  : 'endwhile'  ;
+RETURN    : 'return'    ;
+FUNC      : 'func'      ;
+ENDFUNC   : 'endfunc'   ;
+READ      : 'read'      ;
+WRITE     : 'write'     ;
+ARRAY     : 'array'     ;
+OF        : 'of'        ;
 
-
-INTVAL    : ('0'..'9')+ ;
+INTVAL    : ('0'..'9')+                         ;
 BOOLVAL   : ('true'|'false');
-FLOATVAL  : ('0'..'9')+ ('.') ('0'..'9')+;
-CHARVAL   : '\'' ( ESC_SEQ | ~('\\'|'"') ) '\'';
+FLOATVAL  : ('0'..'9')+ ('.') ('0'..'9')+       ;
+CHARVAL   : '\'' ( ESC_SEQ | ~('\\'|'"') ) '\'' ;
 
 
 

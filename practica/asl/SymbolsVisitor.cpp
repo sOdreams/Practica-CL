@@ -100,9 +100,9 @@ antlrcpp::Any SymbolsVisitor::visitFunction(AslParser::FunctionContext *ctx) {
     }
     //mirar el types ctx->types()... y dependiendo de eso poner un return adecuado?
     TypesMgr::TypeId tRet = Types.createVoidTy(); //POR DEFECTO
-    if(ctx->type()) { //si hay valor de retorno
-      visit(ctx->type());
-      tRet = getTypeDecor(ctx->type());
+    if(ctx->basic_type()) { //si hay valor de retorno
+      visit(ctx->basic_type());
+      tRet = getTypeDecor(ctx->basic_type());
     }
 
     TypesMgr::TypeId tFunc = Types.createFunctionTy(lParamsTy, tRet);
@@ -168,7 +168,7 @@ antlrcpp::Any SymbolsVisitor::visitVariable_decl(AslParser::Variable_declContext
   return 0;
 }
 
-antlrcpp::Any SymbolsVisitor::visitType(AslParser::TypeContext *ctx) {
+antlrcpp::Any SymbolsVisitor::visitBasic_type(AslParser::Basic_typeContext *ctx) {
   DEBUG_ENTER();
   if (ctx->INT()) {
     TypesMgr::TypeId t = Types.createIntegerTy();
@@ -190,6 +190,49 @@ antlrcpp::Any SymbolsVisitor::visitType(AslParser::TypeContext *ctx) {
   return 0;
 }
 
+
+antlrcpp::Any SymbolsVisitor::visitType(AslParser::TypeContext *ctx) {
+  DEBUG_ENTER();
+  //caso basico
+  TypesMgr::TypeId typoADecorar;
+
+  if(ctx->basic_type()){
+    visit(ctx->basic_type());
+    typoADecorar = getTypeDecor(ctx->basic_type()); //decoramos con el tipo que haya decorado basic
+  }
+  else { //caso del array
+    visit(ctx->array_type());
+    typoADecorar = getTypeDecor(ctx->array_type());
+  }
+
+  putTypeDecor(ctx,typoADecorar);
+
+  DEBUG_EXIT();
+  return 0;
+}
+
+
+
+// TypeId createArrayTy     (unsigned int                size,
+// 		            TypeId                      elemType);
+
+antlrcpp::Any SymbolsVisitor::visitArray_type(AslParser::Array_typeContext *ctx) {
+  DEBUG_ENTER();
+  //hay que crear el array con el intval etc...
+
+  unsigned int arraySize = std::stoi(ctx->INTVAL()->getText()); //mida del array a int
+  visit(ctx->basic_type()); 
+  TypesMgr::TypeId typoBasico = getTypeDecor(ctx->basic_type());
+
+  //creacion del array
+  TypesMgr::TypeId array = Types.createArrayTy(arraySize,typoBasico);
+
+  putTypeDecor(ctx,array);
+
+  DEBUG_EXIT();
+  return 0;
+
+}
 // antlrcpp::Any SymbolsVisitor::visitStatements(AslParser::StatementsContext *ctx) {
 //   DEBUG_ENTER();
 //   antlrcpp::Any r = visitChildren(ctx);

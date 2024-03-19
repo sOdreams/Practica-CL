@@ -39,6 +39,14 @@ public:
     return visitChildren(ctx);
   }
 
+  virtual antlrcpp::Any visitArray_type(AslParser::Array_typeContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
+  virtual antlrcpp::Any visitBasic_type(AslParser::Basic_typeContext *ctx) override {
+    return visitChildren(ctx);
+  }
+
   virtual antlrcpp::Any visitStatements(AslParser::StatementsContext *ctx) override {
     return visitChildren(ctx);
   }

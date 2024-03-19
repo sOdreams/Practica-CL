@@ -17,14 +17,16 @@ public:
     LPAR = 16, RPAR = 17, LCOR = 18, RCOR = 19, PLUS = 20, MUL = 21, VAR = 22, 
     INT = 23, BOOL = 24, FLOAT = 25, CHAR = 26, IF = 27, THEN = 28, ELSE = 29, 
     ENDIF = 30, WHILE = 31, DO = 32, ENDWHILE = 33, RETURN = 34, FUNC = 35, 
-    ENDFUNC = 36, READ = 37, WRITE = 38, INTVAL = 39, BOOLVAL = 40, FLOATVAL = 41, 
-    CHARVAL = 42, ID = 43, STRING = 44, COMMENT = 45, WS = 46
+    ENDFUNC = 36, READ = 37, WRITE = 38, ARRAY = 39, OF = 40, INTVAL = 41, 
+    BOOLVAL = 42, FLOATVAL = 43, CHARVAL = 44, ID = 45, STRING = 46, COMMENT = 47, 
+    WS = 48
   };
 
   enum {
     RuleProgram = 0, RuleFunction = 1, RuleParameters = 2, RuleDeclarations = 3, 
-    RuleVariable_decl = 4, RuleType = 5, RuleStatements = 6, RuleStatement = 7, 
-    RuleLeft_expr = 8, RuleExpr = 9, RuleIdent = 10
+    RuleVariable_decl = 4, RuleType = 5, RuleArray_type = 6, RuleBasic_type = 7, 
+    RuleStatements = 8, RuleStatement = 9, RuleLeft_expr = 10, RuleExpr = 11, 
+    RuleIdent = 12
   };
 
   AslParser(antlr4::TokenStream *input);
@@ -43,6 +45,8 @@ public:
   class DeclarationsContext;
   class Variable_declContext;
   class TypeContext;
+  class Array_typeContext;
+  class Basic_typeContext;
   class StatementsContext;
   class StatementContext;
   class Left_exprContext;
@@ -75,7 +79,7 @@ public:
     DeclarationsContext *declarations();
     StatementsContext *statements();
     antlr4::tree::TerminalNode *ENDFUNC();
-    TypeContext *type();
+    Basic_typeContext *basic_type();
 
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
    
@@ -130,6 +134,36 @@ public:
   public:
     TypeContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
+    Basic_typeContext *basic_type();
+    Array_typeContext *array_type();
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  TypeContext* type();
+
+  class  Array_typeContext : public antlr4::ParserRuleContext {
+  public:
+    Array_typeContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
+    antlr4::tree::TerminalNode *ARRAY();
+    antlr4::tree::TerminalNode *LCOR();
+    antlr4::tree::TerminalNode *INTVAL();
+    antlr4::tree::TerminalNode *RCOR();
+    antlr4::tree::TerminalNode *OF();
+    Basic_typeContext *basic_type();
+
+    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+   
+  };
+
+  Array_typeContext* array_type();
+
+  class  Basic_typeContext : public antlr4::ParserRuleContext {
+  public:
+    Basic_typeContext(antlr4::ParserRuleContext *parent, size_t invokingState);
+    virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *INT();
     antlr4::tree::TerminalNode *BOOL();
     antlr4::tree::TerminalNode *FLOAT();
@@ -139,7 +173,7 @@ public:
    
   };
 
-  TypeContext* type();
+  Basic_typeContext* basic_type();
 
   class  StatementsContext : public antlr4::ParserRuleContext {
   public:
