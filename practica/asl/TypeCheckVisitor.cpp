@@ -230,15 +230,25 @@ antlrcpp::Any TypeCheckVisitor::visitLeft_array_acces(AslParser::Left_array_acce
   visit(ctx->expr());
   TypesMgr::TypeId t2 = getTypeDecor(ctx->expr());
 
-  if(((not Types.isErrorTy(t1)) and (not Types.isArrayTy(t1))))
+  bool es_array = not (Types.isErrorTy(t1));
+
+  if(((not Types.isErrorTy(t1)) and (not Types.isArrayTy(t1)))){ // aqui entra si t1 no es un array
       Errors.nonArrayInArrayAccess(ctx->ident());
+      es_array = false;
+      t1 = Types.createErrorTy();
+  }
   
-  if (((not Types.isErrorTy(t2)) and (not Types.isNumericTy(t2))))
+  if (((not Types.isErrorTy(t2)) and (not Types.isIntegerTy(t2)))) //aqui entra si el indice no es un numero entero
     Errors.nonIntegerIndexInArrayAccess(ctx->expr());
 
+
+//t1 es un identificador, necesito decorarlo cnoo el tipo de los valores del array
+  if(es_array){
+    t1 = Types.getArrayElemType(t1);
+  }
+
   putTypeDecor(ctx, t1);
-  bool b = getIsLValueDecor(ctx->ident());
-  putIsLValueDecor(ctx, b);
+  putIsLValueDecor(ctx, true);
   DEBUG_EXIT();
   return 0;
 }
@@ -254,10 +264,12 @@ DEBUG_ENTER();
   if(((not Types.isErrorTy(t1)) and (not Types.isArrayTy(t1))))
       Errors.nonArrayInArrayAccess(ctx->ident());
   
-  if (((not Types.isErrorTy(t2)) and (not Types.isNumericTy(t2))))
+  if (((not Types.isErrorTy(t2)) and (not Types.isIntegerTy(t2))))
     Errors.nonIntegerIndexInArrayAccess(ctx->expr());
 
-  putTypeDecor(ctx, t1);
+  TypesMgr::TypeId typeArray = Types.createErrorTy();
+  typeArray = Types.getArrayElemType(t1);
+  putTypeDecor(ctx, typeArray);
   bool b = getIsLValueDecor(ctx->ident());
   putIsLValueDecor(ctx, b);
   DEBUG_EXIT();
@@ -301,7 +313,12 @@ antlrcpp::Any TypeCheckVisitor::visitReturnCall(AslParser::ReturnCallContext *ct
   
   DEBUG_EXIT();
   return 0;
+
 }
+
+
+//        | READ left_expr ';'                  # readStmt
+
 
 antlrcpp::Any TypeCheckVisitor::visitReadStmt(AslParser::ReadStmtContext *ctx) {
   DEBUG_ENTER();
@@ -337,6 +354,7 @@ antlrcpp::Any TypeCheckVisitor::visitJust_ident(AslParser::Just_identContext *ct
   DEBUG_ENTER();
   visit(ctx->ident());
   TypesMgr::TypeId t1 = getTypeDecor(ctx->ident());
+
   putTypeDecor(ctx, t1);
   bool b = getIsLValueDecor(ctx->ident());
   putIsLValueDecor(ctx, b);
