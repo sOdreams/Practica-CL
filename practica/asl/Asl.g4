@@ -84,7 +84,7 @@ statement
 
 
           // A function/procedure call has a list of arguments in parenthesis (possibly empty)
-        | ident '(' ')' ';'                   # procCall
+        | ident LPAR (expr (',' expr)*)? RPAR   ';'                  # procCall
 
 
         //return (optional expr)
@@ -102,8 +102,9 @@ statement
           // Write a string
         | WRITE STRING ';'                    # writeString
 
-                //para el ejercicio 8, es poder hacer llamadas a funciones tal cual sin asignaciones
-        | ident LPAR (expr (',' expr)*)? RPAR   ';'           # procedure_call
+//                //para el ejercicio 8, es poder hacer llamadas a funciones tal cual sin asignaciones
+//               | ident LPAR (expr (',' expr)*)? RPAR   ';'           # procedure_call
+//              ELIMINADO PORQUE SE PUEDE HACER EN ProcCall
         ;
 
 // Grammar for left expressions (l-values in C++)

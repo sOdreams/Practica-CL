@@ -174,6 +174,8 @@ public:
     IdentContext *ident();
     antlr4::tree::TerminalNode *LPAR();
     antlr4::tree::TerminalNode *RPAR();
+    std::vector<ExprContext *> expr();
+    ExprContext* expr(size_t i);
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
@@ -237,18 +239,6 @@ public:
     Left_exprContext *left_expr();
     antlr4::tree::TerminalNode *ASSIGN();
     ExprContext *expr();
-    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-  };
-
-  class  Procedure_callContext : public StatementContext {
-  public:
-    Procedure_callContext(StatementContext *ctx);
-
-    IdentContext *ident();
-    antlr4::tree::TerminalNode *LPAR();
-    antlr4::tree::TerminalNode *RPAR();
-    std::vector<ExprContext *> expr();
-    ExprContext* expr(size_t i);
     virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
   };
 
