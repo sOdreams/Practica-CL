@@ -84,6 +84,17 @@ antlrcpp::Any TypeCheckVisitor::visitProgram(AslParser::ProgramContext *ctx) {
 
 antlrcpp::Any TypeCheckVisitor::visitFunction(AslParser::FunctionContext *ctx) {
   DEBUG_ENTER();
+
+  //tipo return de la funcion en scope
+  std::vector<TypesMgr::TypeId> lParamsTy;
+  TypesMgr::TypeId tRet = Types.createVoidTy();
+  if (ctx->basic_type() != NULL){
+    //visit(ctx->basic_type());   //no haria falta, basic_type ya se visito en Symbols.
+    tRet = getTypeDecor(ctx->basic_type());
+  }
+  TypesMgr::TypeId tFunc = Types.createFunctionTy(lParamsTy, tRet); //tipo funcion en scope
+  setCurrentFunctionTy(tFunc);
+
   SymTable::ScopeId sc = getScopeDecor(ctx);
   Symbols.pushThisScope(sc);
   // Symbols.print();
@@ -290,26 +301,23 @@ antlrcpp::Any TypeCheckVisitor::visitReturnCall(AslParser::ReturnCallContext *ct
   // funciones para saber la funcion actual --> Symbols
   
 
-  
+  TypesMgr::TypeId f = getCurrentFunctionTy();
 
-  // if(ctx->expr()) { //si es un return con expresion , tiene que hacer match con el return de la funcion, si es sin expresion, tiene que hacer match con void
-  //   visit(ctx->expr());
-  //   TypeMgr::TypeId tipoReturnFuncion = Types.getFuncReturnType(func_actual_name);
-  //   TypesMgr::TypeId tipoReturn = getTypeDecor(ctx->expr());
+   if(ctx->expr()) { //si es un return con expresion , tiene que hacer match con el return de la funcion, si es sin expresion, tiene que hacer match con void
+     visit(ctx->expr());
+     TypesMgr::TypeId tipoReturnFuncion = Types.getFuncReturnType(f);
+     TypesMgr::TypeId tipoReturn = getTypeDecor(ctx->expr());
 
-  //   //si tipoReturnFunction es error -->es void y tipoReturn no es error --> no es void --> error
-  //   //casos en el que alguno de los dos es error (void) y otro no
-  //   if(Types.isErrorTy(tipoReturnFuncion) && not Types.isErrorTy(tipoReturn)) {
-  //     Errors.incompatibleReturn(ctx->RETURN());
-  //   }
-  //   if(Types.isErrorTy(tipoReturn) && not Types.isErrorTy(tipoReturnFuncion)){
-  //     Errors.incompatibleReturn(ctx->RETURN());
-  //   }
-  //   if(not Types.equalTypes(tipoReturn,tipoReturnFuncion)){
-  //     Errors.incompatibleReturn(ctx->RETURN());
-  //   }
-  //   //casos en los que no son void, pero tiene que haber match de tipaje
-
+  //No hace falta comprobar si tipoReturnFuncion es errorty, ya que ya se hace en visitfunction
+     if(not Types.isErrorTy(tipoReturn) && Types.isVoidFunction(f)) Errors.incompatibleReturn(ctx->RETURN());
+     else if ((not Types.isErrorTy(tipoReturn)) and (not Types.equalTypes(tipoReturn, tipoReturnFuncion))){
+      if (not (Types.isIntegerTy(tipoReturn) and Types.isFloatTy(tipoReturnFuncion))) {
+       Errors.incompatibleReturn(ctx->RETURN());   //tipos diferentes en el return, aunque si la funcion es float y retornas int(es correcto)
+      }
+     }
+    }
+    //la funcion no es void, pero se pone por erro un return normal
+    else if (not Types.isVoidFunction(f)) Errors.incompatibleReturn(ctx->RETURN());  //salida void, funcion no voidelse 
   
   DEBUG_EXIT();
   return 0;
