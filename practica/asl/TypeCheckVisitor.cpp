@@ -195,20 +195,20 @@ antlrcpp::Any TypeCheckVisitor::visitProcCall(AslParser::ProcCallContext *ctx) {
     visit(ctx->ident());
     TypesMgr::TypeId FuncID = getTypeDecor(ctx->ident());
 
-    // Check if FuncID corresponds to a function
-    if (Types.isFunctionTy(FuncID)) {
+    //visit parameters
+    for (size_t i = 0; i < (ctx->expr()).size(); ++i) {  //visitamo parametros
+          visit(ctx->expr(i));
+    }
 
-        // Get the return type of the function
-        // TypesMgr::TypeId tipoReturn = Types.getFuncReturnType(FuncID);
-        
-        // // Check if the function returns void
-        // if (Types.isVoidFunction(FuncID)) {
-        //     Errors.isNotCallable(ctx->ident());
-        // }
+    if(not Types.isFunctionTy(FuncID) and not Types.isErrorTy(FuncID) ){
+        Errors.isNotCallable(ctx->ident());
+    }
+
+    //si es una functionTy -> no sera un errorTy
+    else if (not Types.isErrorTy(FuncID)) {
 
         // Get the expected parameter types of the function
         std::vector<TypesMgr::TypeId> ParametrosFunction = Types.getFuncParamsTypes(FuncID);
-
         // Check if the number of parameters matches
         if (ctx->expr().size() != ParametrosFunction.size()) {
             Errors.numberOfParameters(ctx->ident());
@@ -224,8 +224,7 @@ antlrcpp::Any TypeCheckVisitor::visitProcCall(AslParser::ProcCallContext *ctx) {
             }
         }
   
-    } else  if(not Types.isFunctionTy(FuncID) and not Types.isErrorTy(FuncID) ){
-        Errors.isNotCallable(ctx->ident());}
+    }
 
   DEBUG_EXIT();
   return 0;
@@ -241,7 +240,7 @@ antlrcpp::Any TypeCheckVisitor::visitLeft_array_acces(AslParser::Left_array_acce
   visit(ctx->expr());
   TypesMgr::TypeId t2 = getTypeDecor(ctx->expr());
 
-  bool es_array = not (Types.isErrorTy(t1));
+  bool es_array = (not Types.isErrorTy(t1));
 
   if(((not Types.isErrorTy(t1)) and (not Types.isArrayTy(t1)))){ // aqui entra si t1 no es un array
       Errors.nonArrayInArrayAccess(ctx->ident());
@@ -272,15 +271,22 @@ DEBUG_ENTER();
   visit(ctx->expr());
   TypesMgr::TypeId t2 = getTypeDecor(ctx->expr());
 
-  if(((not Types.isErrorTy(t1)) and (not Types.isArrayTy(t1))))
+  bool es_array = (not Types.isErrorTy(t1));
+
+  if(((not Types.isErrorTy(t1)) and (not Types.isArrayTy(t1)))){
       Errors.nonArrayInArrayAccess(ctx->ident());
+      es_array = false;
+      t1 = Types.createErrorTy();
+  }
   
   if (((not Types.isErrorTy(t2)) and (not Types.isIntegerTy(t2))))
     Errors.nonIntegerIndexInArrayAccess(ctx->expr());
 
-  TypesMgr::TypeId typeArray = Types.createErrorTy();
-  typeArray = Types.getArrayElemType(t1);
-  putTypeDecor(ctx, typeArray);
+  if(es_array){
+    t1 = Types.getArrayElemType(t1);
+  }
+
+  putTypeDecor(ctx, t1);
   bool b = getIsLValueDecor(ctx->ident());
   putIsLValueDecor(ctx, b);
   DEBUG_EXIT();
@@ -553,7 +559,7 @@ antlrcpp::Any TypeCheckVisitor::visitFunc_call(AslParser::Func_callContext *ctx)
     TypesMgr::TypeId FuncID = getTypeDecor(ctx->ident());
 
     // Check if FuncID corresponds to a function
-     if(not Types.isFunctionTy(FuncID) and not Types.isErrorTy(FuncID)){
+     if(not Types.isFunctionTy(FuncID) or not Types.isErrorTy(FuncID)){
         Errors.isNotCallable(ctx->ident());}
 
     else {
@@ -564,11 +570,11 @@ antlrcpp::Any TypeCheckVisitor::visitFunc_call(AslParser::Func_callContext *ctx)
         // Check if the function returns void
         if (Types.isVoidFunction(FuncID)) {
             Errors.isNotFunction(ctx->ident());
+            tipoReturn = Types.createErrorTy();
         }
 
         // Get the expected parameter types of the function
         std::vector<TypesMgr::TypeId> ParametrosFunction = Types.getFuncParamsTypes(FuncID);
-
         // Check if the number of parameters matches
         if (ctx->expr().size() != ParametrosFunction.size()) {
             Errors.numberOfParameters(ctx->ident());
