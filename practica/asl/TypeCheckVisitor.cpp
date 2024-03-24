@@ -591,6 +591,7 @@ antlrcpp::Any TypeCheckVisitor::visitFunc_call(AslParser::Func_callContext *ctx)
             TypesMgr::TypeId typeExpr = getTypeDecor(ctx->expr(i));
 
             if (!Types.equalTypes(typeExpr, ParametrosFunction[i])) {
+              if (not Types.isErrorTy(typeExpr) and not (Types.isIntegerTy(typeExpr) and Types.isFloatTy(ParametrosFunction[i])))
                 Errors.incompatibleParameter(ctx->expr(i), i+1, ctx);
             }
         }
