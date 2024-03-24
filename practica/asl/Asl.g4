@@ -92,7 +92,7 @@ statement
 
 
           // A function/procedure call has a list of arguments in parenthesis (possibly empty)
-        | ident LPAR (expr (',' expr)*)? RPAR   ';'                       # procCall
+        | ident LPAR (expr (',' expr)*)? RPAR   ';'                       # procCall //proccall puede ser void functions, funcall NO
 
 
         //return (optional expr)
@@ -125,11 +125,11 @@ left_expr
 
 expr    : LPAR expr RPAR                                    # parenthesis
         | op=(NOT|MINUS|PLUS) expr                          # unary
-        | expr op=(MUL|DIV) expr                            # arithmetic
+        | expr op=(MUL|DIV|MOD) expr                        # arithmetic
         | expr op=(PLUS|MINUS) expr                         # arithmetic
         | expr op=(EQUAL|NEQ|GT|GE|LT|LE) expr              # relational
         | ident LCOR expr RCOR                              # expr_array_acces
-        | ident LPAR (expr (',' expr)*)? RPAR               # func_call
+        | ident LPAR (expr (',' expr)*)? RPAR               # func_call //proccall puede ser void functions, funcall NO
         | expr op=AND expr                                  # logical
         | expr op=OR expr                                   # logical
         | (INTVAL | FLOATVAL | BOOLVAL | CHARVAL)           # value
@@ -156,6 +156,7 @@ AND       : 'and'       ;
 OR        : 'or'        ;
 MINUS     : '-'         ;
 DIV       : '/'         ;
+MOD       : '%'         ;
 LPAR      : '('         ;
 RPAR      : ')'         ;
 LCOR      : '['         ;

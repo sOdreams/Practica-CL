@@ -210,18 +210,20 @@ antlrcpp::Any TypeCheckVisitor::visitProcCall(AslParser::ProcCallContext *ctx) {
         // Get the expected parameter types of the function
         std::vector<TypesMgr::TypeId> ParametrosFunction = Types.getFuncParamsTypes(FuncID);
         // Check if the number of parameters matches
-        if (ctx->expr().size() != ParametrosFunction.size()) {
+        if (ctx->expr().size() != Types.getNumOfParameters(FuncID)) {
             Errors.numberOfParameters(ctx->ident());
         }
+        else{
 
-        // Check the type compatibility of each parameter
-        for (unsigned long int i = 0; i < ctx->expr().size(); ++i) {
-            visit(ctx->expr(i));
-            TypesMgr::TypeId typeExpr = getTypeDecor(ctx->expr(i));
+          // Check the type compatibility of each parameter
+          for (unsigned long int i = 0; i < ctx->expr().size(); ++i) {
+              visit(ctx->expr(i));
+              TypesMgr::TypeId typeExpr = getTypeDecor(ctx->expr(i));
 
-            if (!Types.equalTypes(typeExpr, ParametrosFunction[i])) {
-                Errors.incompatibleParameter(ctx->expr(i), ctx->expr().size(), ctx->ident());
-            }
+              if (!Types.equalTypes(typeExpr, ParametrosFunction[i])) {
+                  Errors.incompatibleParameter(ctx->expr(i), ctx->expr().size(), ctx->ident());
+              }
+          }
         }
   
     }
@@ -383,18 +385,23 @@ antlrcpp::Any TypeCheckVisitor::visitArithmetic(AslParser::ArithmeticContext *ct
   visit(ctx->expr(1));
   TypesMgr::TypeId t2 = getTypeDecor(ctx->expr(1));
 
-  if (((not Types.isErrorTy(t1)) and (not Types.isNumericTy(t1))) or
-      ((not Types.isErrorTy(t2)) and (not Types.isNumericTy(t2))))
-    Errors.incompatibleOperator(ctx->op);
+  TypesMgr::TypeId t = Types.createIntegerTy();
 
-  if(Types.isFloatTy(t1) or Types.isFloatTy(t2)){  //CONVERSION A FLOAT
-    TypesMgr::TypeId t = Types.createFloatTy();
-    putTypeDecor(ctx, t);
+  if (ctx->MOD()) {   //MOD solo a enteros
+     if (((not Types.isErrorTy(t1)) and (not Types.isIntegerTy(t1))) or 
+        ((not Types.isErrorTy(t2)) and (not Types.isIntegerTy(t2))))
+        Errors.incompatibleOperator(ctx->op);
   }
-  else{
-    TypesMgr::TypeId t = Types.createIntegerTy();
-    putTypeDecor(ctx, t);
+  else {
+    if (((not Types.isErrorTy(t1)) and (not Types.isNumericTy(t1))) or
+        ((not Types.isErrorTy(t2)) and (not Types.isNumericTy(t2))))
+      Errors.incompatibleOperator(ctx->op);
+
+    if(Types.isFloatTy(t1) or Types.isFloatTy(t2)){  //CONVERSION A FLOAT
+      t = Types.createFloatTy();
+    }
   }
+  putTypeDecor(ctx, t);
   putIsLValueDecor(ctx, false);
   DEBUG_EXIT();
   return 0;
@@ -581,19 +588,21 @@ antlrcpp::Any TypeCheckVisitor::visitFunc_call(AslParser::Func_callContext *ctx)
         // Get the expected parameter types of the function
         std::vector<TypesMgr::TypeId> ParametrosFunction = Types.getFuncParamsTypes(FuncID);
         // Check if the number of parameters matches
-        if (ctx->expr().size() != ParametrosFunction.size()) {
+        if (ctx->expr().size() != Types.getNumOfParameters(FuncID)) {
             Errors.numberOfParameters(ctx->ident());
         }
 
-        // Check the type compatibility of each parameter
-        for (unsigned long int i = 0; i < ctx->expr().size(); ++i) {
-            visit(ctx->expr(i));
-            TypesMgr::TypeId typeExpr = getTypeDecor(ctx->expr(i));
+        else{
+          // Check the type compatibility of each parameter
+          for (unsigned long int i = 0; i < ctx->expr().size(); ++i) {
+              visit(ctx->expr(i));
+              TypesMgr::TypeId typeExpr = getTypeDecor(ctx->expr(i));
 
-            if (!Types.equalTypes(typeExpr, ParametrosFunction[i])) {
-              if (not Types.isErrorTy(typeExpr) and not (Types.isIntegerTy(typeExpr) and Types.isFloatTy(ParametrosFunction[i])))
-                Errors.incompatibleParameter(ctx->expr(i), i+1, ctx);
-            }
+              if (!Types.equalTypes(typeExpr, ParametrosFunction[i])) {
+                if (not Types.isErrorTy(typeExpr) and not (Types.isIntegerTy(typeExpr) and Types.isFloatTy(ParametrosFunction[i])))
+                  Errors.incompatibleParameter(ctx->expr(i), i+1, ctx);
+              }
+          }
         }
     }
     else{
