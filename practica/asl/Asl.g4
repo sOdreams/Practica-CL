@@ -3,6 +3,18 @@
 //2. >> make
 //3. ./asl ../examples/jp_chkt_01.asl
 
+//COMO COMPILAR LOS EJS DE GENCODE:
+//1. >> make antlr
+//2. >> make
+//3. >> ./asl ../examples/jpbasic_genc_01.asl > a.t
+//4. >> ../tvm/tvm-linux a.t
+
+
+//extras:
+//puedes ver los inputs y outputs con los (.in y .out)
+
+// para ver si el error de cmpilacion es a causa del CodeGen solamente (y no de errores semanticos, sintatico...): ./asl --noCodegen ../examples/jpbasic_genc_01.asl > a.t
+
 
 //////////////////////////////////////////////////////////////////////
 //

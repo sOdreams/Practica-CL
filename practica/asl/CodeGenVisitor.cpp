@@ -101,8 +101,11 @@ antlrcpp::Any CodeGenVisitor::visitDeclarations(AslParser::DeclarationsContext *
   DEBUG_ENTER();
   std::vector<var> lvars;
   for (auto & varDeclCtx : ctx->variable_decl()) {
-    var onevar = visit(varDeclCtx);
-    lvars.push_back(onevar);
+    //modificacion de Codegen_01.asl: ahora el visit retornara un vector de vars
+    std::vector<var> somevars = visit(varDeclCtx);
+    for(auto & onevar: somevars) lvars.push_back(onevar);
+    //var onevar = visit(varDeclCtx);
+    //lvars.push_back(onevar);
   }
   DEBUG_EXIT();
   return lvars;
@@ -112,8 +115,15 @@ antlrcpp::Any CodeGenVisitor::visitVariable_decl(AslParser::Variable_declContext
   DEBUG_ENTER();
   TypesMgr::TypeId   t1 = getTypeDecor(ctx->type());
   std::size_t      size = Types.getSizeOfType(t1);
+
+  //modificacion de Codegen_01.asl: recorrer todas los ID y hacer un vector de vars que retornaremos
+  std::vector<var> lvars;
+  for(auto & idCtx: ctx->ID()){
+    var onevar = var{idCtx->getText(), Types.to_string(t1), size};
+    lvars.push_back(onevar);
+  }
   DEBUG_EXIT();
-  return var{ctx->ID(0)->getText(), Types.to_string(t1), size};
+  return lvars;
 }
 
 antlrcpp::Any CodeGenVisitor::visitStatements(AslParser::StatementsContext *ctx) {
@@ -231,12 +241,21 @@ antlrcpp::Any CodeGenVisitor::visitArithmetic(AslParser::ArithmeticContext *ctx)
   // TypesMgr::TypeId t1 = getTypeDecor(ctx->expr(0));
   // TypesMgr::TypeId t2 = getTypeDecor(ctx->expr(1));
   // TypesMgr::TypeId  t = getTypeDecor(ctx);
-  std::string temp = "%"+codeCounters.newTEMP();
+  std::string temp = "%"+codeCounters.newTEMP(); //LINEA PARA GENERAR OTRO TEMP, abusa de ella
   if (ctx->MUL())
     code = code || instruction::MUL(temp, addr1, addr2);
-  else // (ctx->PLUS())
+  else if (ctx->PLUS())
     code = code || instruction::ADD(temp, addr1, addr2);
-  CodeAttribs codAts(temp, "", code);
+  else if (ctx->MINUS())
+    code = code || instruction::SUB(temp, addr1, addr2);
+  else if (ctx->DIV())
+    code = code || instruction::DIV(temp, addr1, addr2);
+  else if (ctx->MOD())
+    code = code || instruction::DIV(temp, addr1, addr2);
+
+
+
+  CodeAttribs codAts(temp, "", code); //Linea para generar el nodo a decorar, como es una expresion la retornaremos
   DEBUG_EXIT();
   return codAts;
 }
@@ -254,7 +273,19 @@ antlrcpp::Any CodeGenVisitor::visitRelational(AslParser::RelationalContext *ctx)
   // TypesMgr::TypeId t2 = getTypeDecor(ctx->expr(1));
   // TypesMgr::TypeId  t = getTypeDecor(ctx);
   std::string temp = "%"+codeCounters.newTEMP();
-  code = code || instruction::EQ(temp, addr1, addr2);
+  if (ctx->EQUAL())
+    code = code || instruction::EQ(temp, addr1, addr2);
+  else if (ctx->NEQ())
+    code = code || instruction::EQ(temp, addr1, addr2)||instruction::NOT(temp, temp) ;
+  else if (ctx->GT())
+    code = code || instruction::LE(temp, addr1, addr2)||instruction::NOT(temp, temp) ;
+  else if (ctx->GE())
+    code = code || instruction::LT(temp, addr1, addr2)||instruction::NOT(temp, temp) ;
+  else if (ctx->LT())
+    code = code || instruction::LT(temp, addr1, addr2);
+  else if (ctx->LE())
+    code = code || instruction::LE(temp, addr1, addr2);
+
   CodeAttribs codAts(temp, "", code);
   DEBUG_EXIT();
   return codAts;
