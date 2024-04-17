@@ -85,6 +85,10 @@ public:
   antlrcpp::Any visitJust_ident(AslParser::Just_identContext *ctx);
   antlrcpp::Any visitLeft_array_acces(AslParser::Left_array_accesContext *ctx); 
 
+  antlrcpp::Any visitParenthesis(AslParser::ParenthesisContext *ctx);
+  antlrcpp::Any visitUnary(AslParser::UnaryContext *ctx);
+
+
 private:
 
   // Attributes

@@ -238,27 +238,49 @@ antlrcpp::Any CodeGenVisitor::visitArithmetic(AslParser::ArithmeticContext *ctx)
   std::string         addr2 = codAt2.addr;
   instructionList &   code2 = codAt2.code;
   instructionList &&   code = code1 || code2;
-  // TypesMgr::TypeId t1 = getTypeDecor(ctx->expr(0));
-  // TypesMgr::TypeId t2 = getTypeDecor(ctx->expr(1));
-  // TypesMgr::TypeId  t = getTypeDecor(ctx);
+  TypesMgr::TypeId t1 = getTypeDecor(ctx->expr(0));
+  TypesMgr::TypeId t2 = getTypeDecor(ctx->expr(1));
+  TypesMgr::TypeId  t = getTypeDecor(ctx);
   std::string temp = "%"+codeCounters.newTEMP(); //LINEA PARA GENERAR OTRO TEMP, abusa de ella
-  if (ctx->MUL())
-    code = code || instruction::MUL(temp, addr1, addr2);
-  else if (ctx->PLUS())
-    code = code || instruction::ADD(temp, addr1, addr2);
-  else if (ctx->MINUS())
-    code = code || instruction::SUB(temp, addr1, addr2);
-  else if (ctx->DIV())
-    code = code || instruction::DIV(temp, addr1, addr2);
-  else if (ctx->MOD())
-    code = code || instruction::DIV(temp, addr1, addr2);
 
+  if(Types.isIntegerTy(t)){
+    if (ctx->MUL())
+      code = code || instruction::MUL(temp, addr1, addr2);
+    else if (ctx->PLUS())
+      code = code || instruction::ADD(temp, addr1, addr2);
+    else if (ctx->MINUS())
+      code = code || instruction::SUB(temp, addr1, addr2);
+    else if (ctx->DIV())
+      code = code || instruction::DIV(temp, addr1, addr2);
+    else if (ctx->MOD())
+      code = code || instruction::DIV(temp, addr1, addr2) || MUL(temp,temp,addr2) || SUB(temp,addr1,temp);
 
+  }
+  else { //alguno de los dos, o los dos son de tipo FLOAT, aquel que NO sea float hay que floatarlo (no puede ser que los dos no sean float, entraria en el if)
+    std::string addrF1 = addr1;
+    std::string addrF2 = addr2;
+    
+    if(Types.isIntegerTy(t1)){
+      addrF1 = "%"+codeCounters.newTEMP(); //LINEA PARA GENERAR OTRO TEMP, abusa de ella
+      code = code || instruction::FLOAT(addrF1,addr1);
+    }
+    if(Types.isIntegerTy(t2)){
+      addrF2 = "%"+codeCounters.newTEMP(); //LINEA PARA GENERAR OTRO TEMP, abusa de ella
+      code = code || instruction::FLOAT(addrF2,addr2);
+    }
+
+    if(ctx->MUL()) code = code || instruction::FMUL(temp,addrF1,addrF2);
+    else if(ctx->PLUS()) code = code || instruction::FADD(temp,addrF1,addrF2);
+    else if(ctx-> DIV()) code = code || instruction::FDIV(temp, addrF1,addrF2);
+    else if (ctx-> SUB()) code = code || instruction:: FSUB(temp, addrF1, addrF2);
+  }
 
   CodeAttribs codAts(temp, "", code); //Linea para generar el nodo a decorar, como es una expresion la retornaremos
   DEBUG_EXIT();
   return codAts;
 }
+
+// expr op=(EQUAL|NEQ|GT|GE|LT|LE) expr              # relational
 
 antlrcpp::Any CodeGenVisitor::visitRelational(AslParser::RelationalContext *ctx) {
   DEBUG_ENTER();
@@ -287,6 +309,38 @@ antlrcpp::Any CodeGenVisitor::visitRelational(AslParser::RelationalContext *ctx)
     code = code || instruction::LE(temp, addr1, addr2);
 
   CodeAttribs codAts(temp, "", code);
+  DEBUG_EXIT();
+  return codAts;
+}
+
+// op=(NOT|MINUS|PLUS) expr                          # unary
+antlrcpp::Any CodeGenVisitor::visitUnary(AslParser::UnaryContext *ctx){
+  DEBUG_ENTER();
+  CodeAttribs     && codAt1 = visit(ctx->expr());
+  std::string         addr1 = codAt1.addr;
+  instructionList &   code1 = codAt1.code;
+  instructionList &&   code = code1;
+    TypesMgr::TypeId t1 = getTypeDecor(ctx->expr());
+  // TypesMgr::TypeId  t = getTypeDecor(ctx);
+  std::string temp = "%"+codeCounters.newTEMP();
+  if (ctx->NOT())
+    code = code || instruction::NOT(temp, addr1);
+  else if(ctx->MINUS()) {
+    if(Types.isFloatTy(t1)) code = code || instruction::FNEG(temp,addr1)
+    else code = code || instruction::NEG(temp,addr1);
+  }
+  else if(ctx->PLUS())
+    code = code;
+
+  CodeAttribs codAts(temp, "", code);
+  DEBUG_EXIT();
+  return codAts;
+}
+
+
+antlrcpp::Any CodeGenVisitor::visitParenthesis(AslParser::ParenthesisContext *ctx){
+  DEBUG_ENTER();
+  CodeAttribs && codAts = visit(ctx->expr());
   DEBUG_EXIT();
   return codAts;
 }
